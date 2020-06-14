@@ -6,12 +6,14 @@ import flink.map.ComputeMoneyMapFunc;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.streaming.api.collector.selector.OutputSelector;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
 import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 import org.apache.flink.util.Collector;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class FlinkQuickStart {
@@ -54,6 +56,20 @@ public class FlinkQuickStart {
                 });
 
         transMetricDataStream.print();
+        DataStream<TransMetric> aStream = transMetricDataStream.split(new OutputSelector<TransMetric>() {
+            @Override
+            public Iterable<String> select(TransMetric transMetric) {
+                ArrayList<String> transMetrics = new ArrayList<>();
+                if(transMetric.getGoodsName().equals("a")){
+                    transMetrics.add("a");
+                }
+                else{
+                    transMetrics.add("b");
+                }
+                return transMetrics;
+            }
+        }).select("a");
+        aStream.print();
 //        DataStream<Tuple2<String, Integer>> counts = text.flatMap(new LineSplitter())
 //                .keyBy(0)
 //                .sum(1);
