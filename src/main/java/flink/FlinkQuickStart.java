@@ -4,11 +4,13 @@ package flink;
 import flink.codec.TransMetric;
 import flink.map.ComputeMoneyMapFunc;
 import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.streaming.api.collector.selector.OutputSelector;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
 import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 import org.apache.flink.util.Collector;
@@ -34,43 +36,57 @@ public class FlinkQuickStart {
 
         //计数
         DataStream<TransMetric> transMetricDataStream = text
-                .map(new ComputeMoneyMapFunc())
+                .map(new ComputeMoneyMapFunc()).disableChaining().setParallelism(4)
                 .keyBy("goodsName")
-                .countWindow(2)
-                .apply(new WindowFunction<TransMetric, TransMetric, Tuple, GlobalWindow>() {
+                .map(new MapFunction<TransMetric, TransMetric>() {
                     @Override
-                    public void apply(Tuple tuple, GlobalWindow globalWindow, Iterable<TransMetric> iterable, Collector<TransMetric> collector) throws Exception {
-                        HashMap<String, Integer> map = new HashMap<String, Integer>();
-                        for (TransMetric transMetric : iterable) {
-                            map.put
-                                    (
-                                            transMetric.getGoodsName(),
-                                            map.getOrDefault(transMetric.getGoodsName(), 0)
-                                                    + transMetric.getPrice()
-                                    );
-                        }
-                        for (String key : map.keySet()) {
-                            collector.collect(new TransMetric(key, map.get(key)));
-                        }
+                    public TransMetric map(TransMetric transMetric) throws Exception {
+                        System.out.println(transMetric.getGoodsName() + ":" + transMetric.getPrice());
+                        return transMetric;
                     }
-                });
+                }).setParallelism(2);
+//                .countWindow(2)
+//                .apply(new WindowFunction<TransMetric, TransMetric, Tuple, GlobalWindow>() {
+//                    @Override
+//                    public void apply(Tuple tuple, GlobalWindow globalWindow, Iterable<TransMetric> iterable, Collector<TransMetric> collector) throws Exception {
+//                        HashMap<String, Integer> map = new HashMap<String, Integer>();
+//                        for (TransMetric transMetric : iterable) {
+//                            map.put
+//                                    (
+//                                            transMetric.getGoodsName(),
+//                                            map.getOrDefault(transMetric.getGoodsName(), 0)
+//                                                    + transMetric.getPrice()
+//                                    );
+//                        }
+//                        for (String key : map.keySet()) {
+//                            collector.collect(new TransMetric(key, map.get(key)));
+//                        }
+//                    }
+//                }).disableChaining();
 
-        transMetricDataStream.print();
-        DataStream<TransMetric> aStream = transMetricDataStream.split(new OutputSelector<TransMetric>() {
+        //transMetricDataStream.print();
+        transMetricDataStream.addSink(new SinkFunction<TransMetric>() {
             @Override
-            public Iterable<String> select(TransMetric transMetric) {
-                ArrayList<String> transMetrics = new ArrayList<>();
-                if(transMetric.getGoodsName().equals("a")){
-                    transMetrics.add("a");
-                }
-                else{
-                    transMetrics.add("b");
-                }
-                return transMetrics;
+            public void invoke(TransMetric value, Context context) throws Exception {
+                System.out.println("goodsName:" + value.getGoodsName()
+                        + ";value:" + value.getPrice()
+                );
             }
-        }).select("a");
-        aStream.print();
-//        DataStream<Tuple2<String, Integer>> counts = text.flatMap(new LineSplitter())
+        }).disableChaining().setParallelism(2);
+//        DataStream<TransMetric> aStream = transMetricDataStream.split(new OutputSelector<TransMetric>() {
+//            @Override
+//            public Iterable<String> select(TransMetric transMetric) {
+//                ArrayList<String> transMetrics = new ArrayList<>();
+//                if (transMetric.getGoodsName().equals("a")) {
+//                    transMetrics.add("a");
+//                } else {
+//                    transMetrics.add("b");
+//                }
+//                return transMetrics;
+//            }
+//        }).select("a");
+//        aStream.print();
+////        DataStream<Tuple2<String, Integer>> counts = text.flatMap(new LineSplitter())
 //                .keyBy(0)
 //                .sum(1);
 //        counts.print();

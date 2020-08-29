@@ -7,28 +7,43 @@ import java.util.TimeZone;
 
 public class Test {
     public static void main(String[] args) throws Exception {
-        String rowkey = "3565e0cc1ff99214";
-        Test test = new Test();
-        long ms = test.getMillsecondsfromRowKey(rowkey);
-        Date date = new Date(ms);
+//        String rowkey = "3565e0cc1ff99214";
+//        Test test = new Test();
+//        long ms = test.getMillsecondsfromRowKey(rowkey);
+//        Date date = new Date(ms);
+//
+//        Calendar calendar = Calendar.getInstance();
+//        //calendar.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));
+//        calendar.setFirstDayOfWeek(Calendar.MONDAY);
+//        calendar.setTime(date);
+//
+//        System.out.println(calendar.get(Calendar.WEEK_OF_YEAR));
+//
+//        SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHH");
+//        String f_hour = df.format(new Date(ms));
+//        String yearBegin = f_hour.substring(0, 4);
+//        calendar.setTime(df.parse(yearBegin + "010100"));
+//        long delta = ms - calendar.getTimeInMillis();
+//        System.out.println((delta / (24 * 3600 * 1000)) / 7 + 1);
+//        //System.out.println(yearBegin);
+//        System.out.println(f_hour);
+//
+//        System.out.println("11".substring(0,1));
 
-        Calendar calendar = Calendar.getInstance();
-        //calendar.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));
-        calendar.setFirstDayOfWeek(Calendar.MONDAY);
-        calendar.setTime(date);
+        String str = "";
+        System.out.println(str.isEmpty());
+        int num = 1009;
+        num %= 1000;
+        System.out.println(num);
+        ListNode listNode = new ListNode(1);
+        if(listNode != null){
 
-        System.out.println(calendar.get(Calendar.WEEK_OF_YEAR));
-
-        SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHH");
-        String f_hour = df.format(new Date(ms));
-        String yearBegin = f_hour.substring(0, 4);
-        calendar.setTime(df.parse(yearBegin + "010100"));
-        long delta = ms - calendar.getTimeInMillis();
-        System.out.println((delta / (24 * 3600 * 1000)) / 7 + 1);
-        //System.out.println(yearBegin);
-        System.out.println(f_hour);
+        }
 
 
+        int test1 = -10000;
+        int test2 = 10;
+        System.out.println(test1^test2);
     }
 
     public long getMillsecondsfromRowKey(String rowKey) {
